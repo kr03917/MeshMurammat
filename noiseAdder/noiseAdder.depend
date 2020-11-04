@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1604497586 source:e:\kunza rizvi\fall 2020\fyp\noiseadder\main.cpp
+	<iostream>
+	<iostream>
+	<fstream>
+	<string>
+	<vector>
+	<iomanip>
+	<time.h>
+
