@@ -5,6 +5,7 @@
 #include <vector>
 #include <iomanip>
 #include <time.h>
+#include<cmath>
 
 using namespace std;
 
@@ -47,9 +48,14 @@ void calculateNormals(vector<vector<string>> &vertices, vector<vector<string>> &
 //            edgeVector2.push_back(vectorC[i]-vectorA[i]);
 //
 //        }
+        float normalVecMag;
         normalVector.push_back((edgeVector1[1]*edgeVector2[2])-(edgeVector1[2]*edgeVector2[1]));
         normalVector.push_back((edgeVector1[2]*edgeVector2[0])-(edgeVector1[0]*edgeVector2[2]));
         normalVector.push_back((edgeVector1[0]*edgeVector2[1])-(edgeVector1[1]*edgeVector2[0]));
+        normalVecMag = sqrt(pow(normalVector[0],2)+pow(normalVector[1],2) + pow(normalVector[2],2));
+        normalVector[0]= normalVector[0]/normalVecMag;
+        normalVector[1]= normalVector[1]/normalVecMag;
+        normalVector[2]= normalVector[2]/normalVecMag;
         normals.push_back(normalVector);
 
         vectorA.clear();
@@ -86,7 +92,7 @@ void averageNormals(vector<vector<string>> &vertices, vector<vector<string>> &fa
 }
 
 void gaussNoise(vector<vector<string>> &vertices, vector<vector<float>> &averagedNormals){
-    float rho = 3;
+    float rho = 0.3;
     srand (time(NULL));
     int prob;
     for (int vertexNumber=0; vertexNumber<vertices.size(); vertexNumber++){
@@ -99,9 +105,9 @@ void gaussNoise(vector<vector<string>> &vertices, vector<vector<float>> &average
     }
 }
 
+
 int main(){
-//    ifstream MyReadFile("teapot.obj");
-    ifstream MyReadFile("cow.obj");
+    ifstream MyReadFile("happy.obj");
     string myText;
     vector<vector<string>> vertices;
     vector<vector<string>> faces;
@@ -133,14 +139,13 @@ int main(){
 
 //  Display
 //    cout<<"start"<<endl;
-//    for (int i = 0; i < averagedNormals.size(); i++) {
-//        for (int j = 0; j < averagedNormals[i].size(); j++)
-//            cout << averagedNormals[i][j] << " ";
+//    for (int i = 0; i < normals.size(); i++) {
+//        for (int j = 0; j < normals[i].size(); j++)
+//            cout << normals[i][j] << " ";
 //        cout << endl;
 //    }
 
-    ofstream MyFile("noisycow.obj");
-//    ofstream MyFile("noisyteapot.obj");
+    ofstream MyFile("noisy_happy.obj");
     for (int vertexNumber=0; vertexNumber<vertices.size();vertexNumber++){
         MyFile << "v "<<vertices[vertexNumber][0]<<" "<<vertices[vertexNumber][1]<<" "<<vertices[vertexNumber][2] <<"\n";
     }
