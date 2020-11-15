@@ -107,7 +107,7 @@ void gaussNoise(vector<vector<string>> &vertices, vector<vector<float>> &average
 
 
 int main(){
-    ifstream MyReadFile("happy.obj");
+    ifstream MyReadFile("teapot.obj");
     string myText;
     vector<vector<string>> vertices;
     vector<vector<string>> faces;
@@ -145,7 +145,7 @@ int main(){
 //        cout << endl;
 //    }
 
-    ofstream MyFile("noisy_happy.obj");
+    ofstream MyFile("noisy_teapot.obj");
     for (int vertexNumber=0; vertexNumber<vertices.size();vertexNumber++){
         MyFile << "v "<<vertices[vertexNumber][0]<<" "<<vertices[vertexNumber][1]<<" "<<vertices[vertexNumber][2] <<"\n";
     }
