@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" , type="text/css" , href="/stylesheets/style.css">
+    <style>
+        /* The popup form - hidden by default */
+        .form-popup {
+            display: none;
+        }
+
+        #viewer {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id=topbar>
+        <div class="dropdown">
+            <button class="dropbtn">File</button>
+            <div class="dropdown-content">
+                <a href="#">Import</a>
+                <a href="#">Export</a>
+                <a href="#">Export As</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">View</button>
+            <div class="dropdown-content">
+                <a href="#">Full Screen</a>
+                <a href="#">View axes/grid</a>
+                <a href="#">Wireframe</a>
+                <a href="#">Solid View</a>
+                <a href="#">Vertex Info</a>
+                <a href="#">Face Info</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Edit</button>
+            <div class="dropdown-content">
+                <a href="#">Undo</a>
+                <a href="#">Redo</a>
+                <a href="#">Edit History</a>
+            </div>
+        </div>
+    </div>
+    <div id="viewer">
+        <button id="tools">Tools</button>
+        <div class="form-popup" name="myForm" id="myForm">
+            <form action="/" method="GET">
+                <h1>User Input</h1>
+
+                <label for="no1"><b>First input:</b></label>
+                <input type="number" placeholder="Enter an integer" id="no1" required>
+
+                <label for="no2"><b>Second input</b></label>
+                <input type="number" placeholder="Enter an integer" id="no2" required>
+                <button type="button" onclick="myfunc()">Add Numbers</button>
+                <button type="button" onclick="closeForm()">Close</button>
+            </form>
+        </div>
+    </div>
+    <div id="sidebar">
+        <div id="stats">
+            <button id="statistics" onclick=alert();>STATISTICS</button>
+        </div>
+        <div id="filloptions">
+            <button class="fillbutton" id="detect" onclick=alert();>DETECT HOLES</button>
+            <button class="fillbutton" id="fill" type="submit" onclick=openForm()>FILL HOLES</button>
+        </div>
+        <div id="viewoptions">
+            <p id="adjustments">Adjustments</p>
+            <div class="dropdown">
+                <button class="dropbtn view">Lighting</button>
+                <div class="dropdown-content">
+                    <a href="#">Undo</a>
+                    <a href="#">Redo</a>
+                    <a href="#">Edit History</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn view">Shading</button>
+                <div class="dropdown-content">
+                    <a href="#">Undo</a>
+                    <a href="#">Redo</a>
+                    <a href="#">Edit History</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn view">Material</button>
+                <div class="dropdown-content">
+                    <a href="#">Undo</a>
+                    <a href="#">Redo</a>
+                    <a href="#">Edit History</a>
+                </div>
+            </div>
+            <button class="accordion">Section 1</button>
+            <div class="panel">
+                <p>Lorem ipsum...</p>
+            </div>
+
+            <button class="accordion">Section 2</button>
+            <div class="panel">
+                <p>Lorem ipsum...</p>
+            </div>
+
+            <button class="accordion">Section 3</button>
+            <div class="panel">
+                <p>Lorem ipsum...</p>
+            </div>
+        </div>
+    </div>
+    <div id="foot"></div>
+
+    <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+
+        for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+
+                /* Toggle between hiding and showing the active panel */
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            });
+        }
+
+        function myfunc() {
+            var a = document.getElementById("no1").value;
+            var b = document.getElementById("no2").value;
+            console.log(a, b);
+            fetch('./cpp?a=' + a + "&b=" + b).then(data => { return data.text() }).then(res => {
+
+                document.getElementById("viewer").innerHTML = res;
+            });
+
+        }
+
+        function openForm() {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none";
+        }
+
+    </script>
+</body>
