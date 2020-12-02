@@ -16,12 +16,14 @@
     </style>
 </head>
 
-<body>
+<body onLoad="onLoad();">
     <div id=topbar>
         <div class="dropdown">
             <button class="dropbtn">File</button>
             <div class="dropdown-content">
-                <a href="#">Import</a>
+                <form id=file-upload method="GET" action="/meshviewer">
+                    <input id="file-input" type="file">
+                </form>
                 <a href="#">Export</a>
                 <a href="#">Export As</a>
             </div>
@@ -47,19 +49,22 @@
         </div>
     </div>
     <div id="viewer">
-        <button id="tools">Tools</button>
-        <div class="form-popup" name="myForm" id="myForm">
-            <form action="/" method="GET">
-                <h1>User Input</h1>
+        <div id="container" style="height: 537px; width: 962px; position:absolute;
+        margin-left: 0px; border-radius: 3px; display: block; float:left;">
+            <button id="tools">Tools</button>
+            <div class="form-popup" name="myForm" id="myForm">
+                <form action="/" method="GET">
+                    <h1>User Input</h1>
 
-                <label for="no1"><b>First input:</b></label>
-                <input type="number" placeholder="Enter an integer" id="no1" required>
+                    <label for="no1"><b>First input:</b></label>
+                    <input type="number" placeholder="Enter an integer" id="no1" required>
 
-                <label for="no2"><b>Second input</b></label>
-                <input type="number" placeholder="Enter an integer" id="no2" required>
-                <button type="button" onclick="myfunc()">Add Numbers</button>
-                <button type="button" onclick="closeForm()">Close</button>
-            </form>
+                    <label for="no2"><b>Second input</b></label>
+                    <input type="number" placeholder="Enter an integer" id="no2" required>
+                    <button type="button" onclick="myfunc()">Add Numbers</button>
+                    <button type="button" onclick="closeForm()">Close</button>
+                </form>
+            </div>
         </div>
     </div>
     <div id="sidebar">
@@ -72,43 +77,19 @@
         </div>
         <div id="viewoptions">
             <p id="adjustments">Adjustments</p>
-            <div class="dropdown">
-                <button class="dropbtn view">Lighting</button>
-                <div class="dropdown-content">
-                    <a href="#">Undo</a>
-                    <a href="#">Redo</a>
-                    <a href="#">Edit History</a>
-                </div>
-            </div>
-            <div class="dropdown">
-                <button class="dropbtn view">Shading</button>
-                <div class="dropdown-content">
-                    <a href="#">Undo</a>
-                    <a href="#">Redo</a>
-                    <a href="#">Edit History</a>
-                </div>
-            </div>
-            <div class="dropdown">
-                <button class="dropbtn view">Material</button>
-                <div class="dropdown-content">
-                    <a href="#">Undo</a>
-                    <a href="#">Redo</a>
-                    <a href="#">Edit History</a>
-                </div>
-            </div>
-            <button class="accordion">Section 1</button>
+            <button class="accordion view">Lighting</button>
             <div class="panel">
-                <p>Lorem ipsum...</p>
+                <p>Lighting options here</p>
             </div>
 
-            <button class="accordion">Section 2</button>
+            <button class="accordion view">Shading</button>
             <div class="panel">
-                <p>Lorem ipsum...</p>
+                <p>Shading options here</p>
             </div>
 
-            <button class="accordion">Section 3</button>
+            <button class="accordion view">Material</button>
             <div class="panel">
-                <p>Lorem ipsum...</p>
+                <p>Material options here</p>
             </div>
         </div>
     </div>
@@ -151,5 +132,95 @@
             document.getElementById("myForm").style.display = "none";
         }
 
+        function myfunc2() {
+            var a = document.getElementById("file-input").value;
+            console.log(a);
+            fetch('./fileupload').then(data => { return data.text() }).then(res => {
+                document.getElementById("viewer").innerHTML = res;
+            });
+
+        }
     </script>
+
+    <script type="text/javascript" src="http://threejs.org/build/three.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/controls/OrbitControls.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/OBJLoader.js"></script>
+    <script>
+
+        //var socket = io.connect();
+
+        var renderer = null,
+            scene = null,
+            camera = null;
+
+        var input = document.getElementById('file-input');
+
+        /*Get file input from HTML file upload button*/
+        input.addEventListener('change', function (event) {
+
+            var file = this.files[0];					//Get the input file
+            var reader = new FileReader();				//Asynchronously read file content	
+
+            /*Listener is used to wait until file is loaded*/
+            reader.addEventListener('load', function (event) {
+                var contents = event.target.result;
+                var mesh = new THREE.OBJLoader().parse(contents);		//Parse the .obj file content to get mesh
+                scene.add(mesh);
+                console.log("file loaded")
+            }, false);
+
+            /*Error check*/
+            if (reader.readAsBinaryString !== undefined) {
+                reader.readAsBinaryString(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function onLoad() {
+            // Grab our container div
+            var container = document.getElementById("container");
+
+
+            // Create the Three.js renderer, add it to our div
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create a new Three.js scene
+            scene = new THREE.Scene();
+
+            // Put in a camera
+            camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(0, 0, 3);
+
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            //Add controls to zoom in and out
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.zoomSpeed = 0.4;
+            controls.panSpeed = 0.4;
+
+            // Run our render loop
+            render();
+
+
+        }
+
+        function render() {
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        };
+
+
+    </script>
+
+
 </body>
