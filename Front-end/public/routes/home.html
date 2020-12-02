@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" , type="text/css" , href="/stylesheets/style.css">
+    <style>
+        /* The popup form - hidden by default */
+        .form-popup {
+            display: none;
+        }
+
+        #viewer {
+            color: white;
+        }
+    </style>
+</head>
+
+<body onLoad="onLoad();">
+    <div id=topbar>
+        <div class="dropdown">
+            <button class="dropbtn">File</button>
+            <div class="dropdown-content">
+                <form id=file-upload method="GET" action="/meshviewer">
+                    <input id="file-input" type="file">
+                </form>
+                <a href="#">Export</a>
+                <a href="#">Export As</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">View</button>
+            <div class="dropdown-content">
+                <a href="#">Full Screen</a>
+                <a href="#">View axes/grid</a>
+                <a href="#">Wireframe</a>
+                <a href="#">Solid View</a>
+                <a href="#">Vertex Info</a>
+                <a href="#">Face Info</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Edit</button>
+            <div class="dropdown-content">
+                <a href="#">Undo</a>
+                <a href="#">Redo</a>
+                <a href="#">Edit History</a>
+            </div>
+        </div>
+    </div>
+    <div id="viewer">
+        <div id="container" style="height: 537px; width: 962px; position:absolute;
+        margin-left: 0px; border-radius: 3px; display: block; float:left;">
+            <button id="tools">Tools</button>
+            <div class="form-popup" name="myForm" id="myForm">
+                <form action="/" method="GET">
+                    <h1>User Input</h1>
+
+                    <label for="no1"><b>First input:</b></label>
+                    <input type="number" placeholder="Enter an integer" id="no1" required>
+
+                    <label for="no2"><b>Second input</b></label>
+                    <input type="number" placeholder="Enter an integer" id="no2" required>
+                    <button type="button" onclick="myfunc()">Add Numbers</button>
+                    <button type="button" onclick="closeForm()">Close</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="sidebar">
+        <div id="stats">
+            <button id="statistics" onclick=alert();>STATISTICS</button>
+        </div>
+        <div id="filloptions">
+            <button class="fillbutton" id="detect" onclick=alert();>DETECT HOLES</button>
+            <button class="fillbutton" id="fill" type="submit" onclick=openForm()>FILL HOLES</button>
+        </div>
+        <div id="viewoptions">
+            <p id="adjustments">Adjustments</p>
+            <button class="accordion view">Lighting</button>
+            <div class="panel">
+                <p>Lighting options here</p>
+            </div>
+
+            <button class="accordion view">Shading</button>
+            <div class="panel">
+                <p>Shading options here</p>
+            </div>
+
+            <button class="accordion view">Material</button>
+            <div class="panel">
+                <p>Material options here</p>
+            </div>
+        </div>
+    </div>
+    <div id="foot"></div>
+
+    <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+
+        for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+
+                /* Toggle between hiding and showing the active panel */
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            });
+        }
+
+        function myfunc() {
+            var a = document.getElementById("no1").value;
+            var b = document.getElementById("no2").value;
+            console.log(a, b);
+            fetch('./cpp?a=' + a + "&b=" + b).then(data => { return data.text() }).then(res => {
+
+                document.getElementById("viewer").innerHTML = res;
+            });
+
+        }
+
+        function openForm() {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none";
+        }
+
+        function myfunc2() {
+            var a = document.getElementById("file-input").value;
+            console.log(a);
+            fetch('./fileupload').then(data => { return data.text() }).then(res => {
+                document.getElementById("viewer").innerHTML = res;
+            });
+
+        }
+    </script>
+
+    <script type="text/javascript" src="http://threejs.org/build/three.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/controls/OrbitControls.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/OBJLoader.js"></script>
+    <script>
+
+        //var socket = io.connect();
+
+        var renderer = null,
+            scene = null,
+            camera = null;
+
+        var input = document.getElementById('file-input');
+
+        /*Get file input from HTML file upload button*/
+        input.addEventListener('change', function (event) {
+
+            var file = this.files[0];					//Get the input file
+            var reader = new FileReader();				//Asynchronously read file content	
+
+            /*Listener is used to wait until file is loaded*/
+            reader.addEventListener('load', function (event) {
+                var contents = event.target.result;
+                var mesh = new THREE.OBJLoader().parse(contents);		//Parse the .obj file content to get mesh
+                scene.add(mesh);
+                console.log("file loaded")
+            }, false);
+
+            /*Error check*/
+            if (reader.readAsBinaryString !== undefined) {
+                reader.readAsBinaryString(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function onLoad() {
+            // Grab our container div
+            var container = document.getElementById("container");
+
+
+            // Create the Three.js renderer, add it to our div
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create a new Three.js scene
+            scene = new THREE.Scene();
+
+            // Put in a camera
+            camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(0, 0, 3);
+
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+
+            //Add controls to zoom in and out
+            var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.zoomSpeed = 0.4;
+            controls.panSpeed = 0.4;
+
+            // Run our render loop
+            render();
+
+
+        }
+
+        function render() {
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        };
+
+
+    </script>
+
+
+</body>
