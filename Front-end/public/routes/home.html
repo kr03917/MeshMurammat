@@ -65,15 +65,24 @@
                     <button type="button" onclick="closeForm()">Close</button>
                 </form>
             </div>
+            <div class="form-popup" name="denoisePopup" id="denoisePopup">
+                <form action="/" method="GET">
+                    <h1>Hole Filling Options</h1>
+
+                    <label for="question"><b>Do you want to denoise the mesh?</b></label>
+                    <button type="button" onclick=" loadNoisyBunny(); closeDenoisePopup()">No</button>
+                    <button type="button" onclick=" loadBunny(); closeDenoisePopup()">Yes</button>
+                </form>
+            </div>
         </div>
     </div>
     <div id="sidebar">
         <div id="stats">
-            <button id="statistics" onclick=alert();>STATISTICS</button>
+            <button id="statistics" onclick=alert()>STATISTICS</button>
         </div>
         <div id="filloptions">
-            <button class="fillbutton" id="detect" onclick=alert();>DETECT HOLES</button>
-            <button class="fillbutton" id="fill" type="submit" onclick=openForm()>FILL HOLES</button>
+            <button class="fillbutton" id="detect" onclick=loadHoleHighlight()>DETECT HOLES</button>
+            <button class="fillbutton" id="fill" type="submit" onclick=openDenoisePopup()>FILL HOLES</button>
         </div>
         <div id="viewoptions">
             <p id="adjustments">Adjustments</p>
@@ -132,6 +141,14 @@
             document.getElementById("myForm").style.display = "none";
         }
 
+        function openDenoisePopup() {
+            document.getElementById("denoisePopup").style.display = "block";
+        }
+
+        function closeDenoisePopup() {
+            document.getElementById("denoisePopup").style.display = "none";
+        }
+
         function myfunc2() {
             var a = document.getElementById("file-input").value;
             console.log(a);
@@ -142,14 +159,118 @@
         }
     </script>
 
-    <script type="text/javascript" src="http://threejs.org/build/three.min.js"></script>
+
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
     <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/controls/OrbitControls.js"></script>
     <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/OBJLoader.js"></script>
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/PLYLoader.js"></script>
     <script>
 
-        //var socket = io.connect();
+        function loadHoleHighlight() {
+            clearScene();
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            var loader = new THREE.PLYLoader();
+            loader.load('./../images/bunny_hole_highlight.ply', function (geometry) {
+                console.log("ply loaded");
+                geometry.computeVertexNormals();
+                //var texture = new THREE.TextureLoader().load('head3d.jpg');
+                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+                var mesh = new THREE.Mesh(geometry, material);
+
+                mesh.position.x = 0;
+                mesh.position.y = 0;
+                mesh.position.z = 0;
+                mesh.scale.multiplyScalar(6);
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add(mesh);
+
+            });
+        }
+
+        function loadBunny() {
+            clearScene();
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            const loader = new THREE.OBJLoader();
+
+            // load a resource
+            loader.load(
+                // resource URL
+                './../images/complete_bunny.obj',
+                // called when resource is loaded
+                function (object) {
+
+                    scene.add(object);
+
+                },
+                // called when loading is in progresses
+                function (xhr) {
+
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+                },
+                // called when loading has errors
+                function (error) {
+
+                    console.log('An error happened');
+
+                }
+            );
+        }
+
+        function loadNoisyBunny() {
+            clearScene();
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            const loader = new THREE.OBJLoader();
+
+            // load a resource
+            loader.load(
+                // resource URL
+                './../images/filled_noisy_bunny.obj',
+                // called when resource is loaded
+                function (object) {
+
+                    scene.add(object);
+
+                },
+                // called when loading is in progresses
+                function (xhr) {
+
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+                },
+                // called when loading has errors
+                function (error) {
+
+                    console.log('An error happened');
+
+                }
+            );
+        }
+
+        function clearScene() {
+            while (scene.children.length > 0) {
+                scene.remove(scene.children[0]);
+                console.log(scene.children.length);
+            }
+        }
 
         var renderer = null,
             scene = null,
@@ -162,6 +283,7 @@
 
             var file = this.files[0];					//Get the input file
             var reader = new FileReader();				//Asynchronously read file content	
+
 
             /*Listener is used to wait until file is loaded*/
             reader.addEventListener('load', function (event) {
