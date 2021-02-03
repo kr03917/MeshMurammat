@@ -155,12 +155,11 @@ body
   .dropdown:hover .dropbtn {background-color: gray;}
 
 #viewer{
-    height: 567px;
+    height: 577px;
     width: 962px;
-    padding: 0px 20px 20px 0px;
     margin:10px;
     margin-left: 0px;
-    background-color: rgb(87, 84, 84);
+    background-color: black;
     border-radius: 3px;
     display: block;
     float:left;
@@ -230,6 +229,7 @@ body
     background-color: rgb(156, 147, 147);
     border-radius: 2px;
     margin-left:2px;
+    height: 30px;
 }
 
 #adjustments{
@@ -248,11 +248,9 @@ body
 }
 
 .accordion {
-    background-color: #eee;
     color: #444;
     cursor: pointer;
-    padding: 18px;
-    width: 100%;
+    padding: 8px;
     text-align: left;
     border: none;
     outline: none;
