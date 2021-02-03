@@ -169,12 +169,6 @@
 
         function loadHoleHighlight() {
             clearScene();
-            // Create a directional light to show off the object
-            var light = new THREE.PointLight(0xffffff, 1, 0);
-            light.position.set(50, 50, 50);
-            scene.add(light);
-            var ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
             var loader = new THREE.PLYLoader();
             loader.load('./../images/bunny_hole_highlight.ply', function (geometry) {
                 console.log("ply loaded");
@@ -197,12 +191,6 @@
 
         function loadBunny() {
             clearScene();
-            // Create a directional light to show off the object
-            var light = new THREE.PointLight(0xffffff, 1, 0);
-            light.position.set(50, 50, 50);
-            scene.add(light);
-            var ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
             const loader = new THREE.OBJLoader();
 
             // load a resource
@@ -232,12 +220,7 @@
 
         function loadNoisyBunny() {
             clearScene();
-            // Create a directional light to show off the object
-            var light = new THREE.PointLight(0xffffff, 1, 0);
-            light.position.set(50, 50, 50);
-            scene.add(light);
-            var ambientLight = new THREE.AmbientLight(0x404040);
-            scene.add(ambientLight);
+
             const loader = new THREE.OBJLoader();
 
             // load a resource
@@ -270,6 +253,12 @@
                 scene.remove(scene.children[0]);
                 console.log(scene.children.length);
             }
+            // Create a directional light to show off the object
+            var light = new THREE.PointLight(0xffffff, 1, 0);
+            light.position.set(50, 50, 50);
+            scene.add(light);
+            var ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
         }
 
         var renderer = null,
