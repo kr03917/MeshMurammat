@@ -16,7 +16,7 @@
     </style>
 </head>
 
-<body onLoad="onLoad();">
+<body onLoad="onLoad()">
     <div id=topbar>
         <div class="dropdown">
             <button class="dropbtn">File</button>
@@ -33,8 +33,8 @@
             <div class="dropdown-content">
                 <a href="#">Full Screen</a>
                 <a href="#">View axes/grid</a>
-                <a href="#">Wireframe</a>
-                <a href="#">Solid View</a>
+                <a onclick="loadWireframe()">Wireframe</a>
+                <a onclick="loadBunny()">Solid View</a>
                 <a href="#">Vertex Info</a>
                 <a href="#">Face Info</a>
             </div>
@@ -51,7 +51,19 @@
     <div id="viewer">
         <div id="container" style="height: 537px; width: 962px; position:absolute;
         margin-left: 0px; border-radius: 3px; display: block; float:left;">
-            <button id="tools">Tools</button>
+            <div class="dropdown">
+                <button id="tools">Tools &#xf104</button>
+                <div class="dropdown-content-tools">
+                    <a href="#">1</a>
+                    <a href="#">2</a>
+                    <a href="#">3</a>
+                    <a href="#">4</a>
+                    <a href="#">5</a>
+                    <a href="#">6</a>
+                    <a href="#">7</a>
+                    <a href="#">8</a>
+                </div>
+            </div>
             <div class="form-popup" name="myForm" id="myForm">
                 <form action="/" method="GET">
                     <h1>User Input</h1>
@@ -65,6 +77,20 @@
                     <button type="button" onclick="closeForm()">Close</button>
                 </form>
             </div>
+
+            <div class="form-popup" name="statistics" id="statistics">
+                <form action="/" method="GET">
+                    <h1>Statistics</h1>
+                    <label>No. of Vertices: 35,497</label><br>
+                    <label>No. of edges: 104,288</label><br>
+                    <label>No. of faces: 69,451</label><br>
+                    <label>No. of holes: 5</label><br>
+                    <label>Water Tight: No</label>
+
+                    <button type="button" onclick="closeStats()">OK</button>
+                </form>
+            </div>
+
             <div class="form-popup" name="denoisePopup" id="denoisePopup">
                 <form action="/" method="GET">
                     <h1>Hole Filling Options</h1>
@@ -78,7 +104,7 @@
     </div>
     <div id="sidebar">
         <div id="stats">
-            <button id="statistics" onclick=alert()>STATISTICS</button>
+            <button id="statsbutton" onclick=openStats(); fun()>STATISTICS</button>
         </div>
         <div id="filloptions">
             <button class="fillbutton" id="detect" onclick=loadHoleHighlight()>DETECT HOLES</button>
@@ -141,6 +167,14 @@
             document.getElementById("myForm").style.display = "none";
         }
 
+        function openStats() {
+            document.getElementById("statistics").style.display = "block";
+        }
+
+        function closeStats() {
+            document.getElementById("statistics").style.display = "none";
+        }
+
         function openDenoisePopup() {
             document.getElementById("denoisePopup").style.display = "block";
         }
@@ -167,6 +201,8 @@
     <script src="//cdn.rawgit.com/mrdoob/three.js/r87/examples/js/loaders/PLYLoader.js"></script>
     <script>
 
+
+
         function loadHoleHighlight() {
             clearScene();
             var loader = new THREE.PLYLoader();
@@ -175,6 +211,7 @@
                 geometry.computeVertexNormals();
                 //var texture = new THREE.TextureLoader().load('head3d.jpg');
                 var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+
                 var mesh = new THREE.Mesh(geometry, material);
 
                 mesh.position.x = 0;
@@ -185,6 +222,28 @@
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
                 scene.add(mesh);
+
+            });
+        }
+
+        function loadWireframe() {
+            clearScene();
+            var loader = new THREE.PLYLoader();
+            loader.load('./../images/bun_zipper.ply', function (geometry) {
+                console.log("ply loaded");
+                geometry.computeVertexNormals();
+                //var texture = new THREE.TextureLoader().load('head3d.jpg');
+                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+
+                const wireframe = new THREE.WireframeGeometry(geometry);
+                const line = new THREE.LineSegments(wireframe);
+                line.material.depthTest = false;
+                line.material.opacity = 0.25;
+                line.material.transparent = true;
+
+                scene.add(line);
+                console.log(scene.children[0].geometry.vertices);
+
 
             });
         }
@@ -269,10 +328,8 @@
 
         /*Get file input from HTML file upload button*/
         input.addEventListener('change', function (event) {
-
             var file = this.files[0];					//Get the input file
             var reader = new FileReader();				//Asynchronously read file content	
-
 
             /*Listener is used to wait until file is loaded*/
             reader.addEventListener('load', function (event) {
@@ -293,7 +350,6 @@
         function onLoad() {
             // Grab our container div
             var container = document.getElementById("container");
-
 
             // Create the Three.js renderer, add it to our div
             renderer = new THREE.WebGLRenderer({ antialias: true });

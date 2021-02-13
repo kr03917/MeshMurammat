@@ -18,7 +18,7 @@ input.addEventListener( 'change', function( event ) {
 	/*Listener is used to wait until file is loaded*/
 	reader.addEventListener( 'load', function (event) {
 		var contents = event.target.result;				
-		var mesh = new OBJLoader().parse(contents);		//Parse the .obj file content to get mesh
+		var mesh = new THREE.PLYLoader().parse(contents);		//Parse the .obj file content to get mesh
 		scene.add(mesh);
 		console.log("file loaded")
 	}, false );
