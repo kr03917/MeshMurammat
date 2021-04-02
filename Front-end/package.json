@@ -11,6 +11,7 @@
     "http-errors": "^1.8.0",
     "jade": "^1.11.0",
     "morgan": "^1.10.0",
+    "multer": "^1.4.2",
     "node-addon-api": "^3.0.2",
     "node-gyp": "^7.1.2",
     "socket.io": "^3.0.1"
@@ -18,13 +19,12 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-gyp rebuild",
     "start": "node bin/www",
-    "build:dev": "node-gyp -j 16 build --debug",
-    "build": "node-gyp -j 16 build",
-    "rebuild:dev": "node-gyp -j 16 rebuild --debug",
-    "rebuild": "node-gyp -j 16 rebuild",
-    "clean": "node-gyp clean"
+    "build:dev": "node -j 16 build --debug",
+    "build": "node -j 16 build",
+    "rebuild:dev": "node -j 16 rebuild --debug",
+    "rebuild": "node -j 16 rebuild",
+    "clean": "node clean"
   },
   "author": "",
   "license": "ISC",
