@@ -19,12 +19,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/www",
-    "build:dev": "node -j 16 build --debug",
-    "build": "node -j 16 build",
-    "rebuild:dev": "node -j 16 rebuild --debug",
-    "rebuild": "node -j 16 rebuild",
-    "clean": "node clean"
+    "start": "node bin/www"
   },
   "author": "",
   "license": "ISC",
