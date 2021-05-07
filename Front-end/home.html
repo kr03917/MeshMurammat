@@ -41,7 +41,7 @@
                 <a href="#">Full Screen</a>
                 <a href="#">View axes/grid</a>
                 <a onclick="loadWireframe()">Wireframe</a>
-                <a onclick="loadBunny()">Solid View</a>
+                <a onclick="loadSolid()">Solid View</a>
                 <a href="#">Vertex Info</a>
                 <a href="#">Face Info</a>
             </div>
@@ -104,15 +104,11 @@
 
             </div>
 
-
-            <button class="accordion view">Shading</button>
-            <div class="panel">
-                <p>Shading options here</p>
-            </div>
-
             <button class="accordion view">Material</button>
             <div class="panel">
-                <p>Material options here</p>
+                <button name="basic" id="shading-button">Basic</button>
+                <button name="lambert" id="shading-button">Lambert</button>
+                <button name="phong" id="shading-button">Phong</button>
             </div>
         </div>
     </div>
@@ -243,7 +239,7 @@
             console.log("callHighlight called")
             setTimeout(function () {
                 document.getElementById("displaymesh").click();
-            }, 30000)
+            }, 15000)
             console.log("callHighlight ended")
         }
 
@@ -251,7 +247,7 @@
             console.log("callFilled called")
             setTimeout(function () {
                 document.getElementById("filledmesh").click();
-            }, 30000)
+            }, 10000)
             console.log("callFilled ended")
         }
 
@@ -299,6 +295,30 @@
                 line.material.opacity = 0.25;
                 line.material.transparent = true;
                 scene.add(line);
+            });
+        }
+
+        function loadSolid() {
+            clearScene();
+            console.log(extension)
+            if (extension === valids[1]) {
+                currentfilename = currentfilename.replace("obj", "ply").replace("off", "ply")
+                console.log(currentfilename)
+            }
+            var loader = new THREE.PLYLoader();
+            loader.load('./../routes/' + currentfilename, function (geometry) {
+                console.log('./../routes/' + currentfilename);
+                geometry.computeVertexNormals();
+                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
+                var mesh = new THREE.Mesh(mesh, material);
+                mesh.position.x = 0;
+                mesh.position.y = 0;
+                mesh.position.z = 0;
+                mesh.scale.multiplyScalar(6);
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                scene.add(mesh);
             });
         }
 
