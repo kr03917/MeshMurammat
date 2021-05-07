@@ -80,7 +80,7 @@ if (fs.existsSync(pathToFile2)) {
   var fun =function(){
    console.log("fun() start");
    console.log(file.originalname)
-   exec(path.join(__dirname, '/meshtype_exe.exe'), [file.originalname], { cwd: __dirname }).toString()
+   exec(path.join(__dirname, '/conversion_exe.exe'), [file.originalname, 'ply'], { cwd: __dirname }).toString()
   };  
 
   fun(); 
