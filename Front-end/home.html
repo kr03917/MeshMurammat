@@ -97,8 +97,13 @@
             <p id="adjustments">Adjustments</p>
             <button class="accordion view">Lighting</button>
             <div class="panel">
-                <p>Lighting options here</p>
+                <p>Intensity:</p>
+                <p id="demo"></p>
+                <input type="range" min="1" max="1000" value="100" class="slider" id="myRange"
+                    onchange="adjust_light(slider.value)">
+
             </div>
+
 
             <button class="accordion view">Shading</button>
             <div class="panel">
@@ -182,6 +187,7 @@
         var currentfilename = ""
         var valids = [".ply", '.obj']
         var patterns = /\.[0-9a-z]+$/i;
+        var extension = ""
 
         /*Get file input from HTML file upload button*/
         input.addEventListener('change', function (event) {
@@ -192,7 +198,7 @@
             reader.addEventListener('load', function (event) {
                 var contents = event.target.result;
                 currentfilename = file['name']
-                var extension = (currentfilename).match(patterns)[0] //extract extension
+                extension = (currentfilename).match(patterns)[0] //extract extension
                 //PLY file loading
                 if (extension === valids[0]) {
                     console.log(extension)
@@ -214,8 +220,6 @@
 
                 //OBJ File loading
                 if (extension === valids[1]) {
-                    console.log(extension)
-                    console.log(valids[1])
                     console.log('obj detected')
                     var mesh = new THREE.OBJLoader().parse(contents);		//Parse the .obj file content to get mesh
                 }
@@ -279,11 +283,15 @@
 
         function loadWireframe() {
             clearScene();
+            console.log(extension)
+            if (extension === valids[1]) {
+                currentfilename = currentfilename.replace("obj", "ply").replace("off", "ply")
+                console.log(currentfilename)
+            }
             var loader = new THREE.PLYLoader();
             loader.load('./../routes/' + currentfilename, function (geometry) {
                 console.log('./../routes/' + currentfilename);
                 geometry.computeVertexNormals();
-                //var texture = new THREE.TextureLoader().load('head3d.jpg');
                 var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
                 const wireframe = new THREE.WireframeGeometry(geometry);
                 const line = new THREE.LineSegments(wireframe);
@@ -301,7 +309,7 @@
             loader.load('./../routes/holefill.ply', function (geometry) {
                 console.log("ply loaded");
                 geometry.computeVertexNormals();
-                var material = new THREE.MeshStandardMaterial({ color: 0x808080 });
+                var material = new THREE.MeshStandardMaterial({ color: 0xd3d3d3 });
 
                 var mesh = new THREE.Mesh(geometry, material);
 
@@ -317,6 +325,10 @@
             })
 
         }
+
+
+        var light = new THREE.PointLight(0xffffff, 1, 0);
+        var ambientLight = new THREE.AmbientLight(0x404040);
 
         function onLoad() {
             // Grab our container div
@@ -334,10 +346,8 @@
             camera.position.set(0, 10, 10);
 
             // Create a directional light to show off the object
-            var light = new THREE.PointLight(0xffffff, 1, 0);
             light.position.set(50, 50, 50);
             scene.add(light);
-            var ambientLight = new THREE.AmbientLight(0x404040);
             scene.add(ambientLight);
 
             //Add controls to zoom in and out
@@ -416,6 +426,23 @@
         function closeExportForm() {
             document.getElementById("export").style.display = "none";
         }
+
+
+        var slider = document.getElementById("myRange");
+        var output = document.getElementById("demo");
+        output.innerHTML = slider.value; // Display the default slider value
+
+        // Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function () {
+            output.innerHTML = this.value;
+        }
+
+        function adjust_light(val) {
+            console.log(val)
+            console.log(light)
+            light.intensity = val;
+        }
+
 
 
     </script>
