@@ -325,6 +325,18 @@ p
     overflow: hidden;
   }
 
+  .subpanel {
+    background-color: white;
+    display: none;
+    overflow: hidden;
+  }
+
+  .innerpanel{
+    background-color: gray;
+    margin-top: 5px;
+    display: none;
+    overflow: hidden;
+  }
   .accordion:after {
     content: '\02795'; /* Unicode character for "plus" sign (+) */
     font-size: 13px;
