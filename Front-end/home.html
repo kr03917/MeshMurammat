@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* The popup form - hidden by default */
+
         .form-popup {
             display: none;
         }
@@ -39,11 +40,11 @@
             <button class="dropbtn">View</button>
             <div class="dropdown-content">
                 <a href="#">Full Screen</a>
-                <a href="#">View axes/grid</a>
+                <a onclick="displayAxis()">View axes/grid</a>
                 <a onclick="loadWireframe()">Wireframe</a>
                 <a onclick="loadSolid()">Solid View</a>
-                <a href="#">Vertex Info</a>
-                <a href="#">Face Info</a>
+                <!--<a href="#">Vertex Info</a>
+                <a href="#">Face Info</a>-->
             </div>
         </div>
         <div class="dropdown">
@@ -62,9 +63,9 @@
             <div class="form-popup" name="statistics" id="statistics">
                 <form action="/" method="GET">
                     <h1>Statistics</h1>
-                    <label>No. of Vertices: 35,497</label><br>
+                    <label id="num-vertices"></label><br>
                     <label>No. of edges: 104,288</label><br>
-                    <label>No. of faces: 69,451</label><br>
+                    <label id="num-faces"></label><br>
                     <label>No. of holes: 5</label><br>
                     <label>Water Tight: No</label>
 
@@ -96,19 +97,60 @@
         <div id="viewoptions">
             <p id="adjustments">Adjustments</p>
             <button class="accordion view">Lighting</button>
-            <div class="panel">
-                <p>Intensity:</p>
-                <p id="demo"></p>
-                <input type="range" min="1" max="1000" value="100" class="slider" id="myRange"
-                    onchange="adjust_light(slider.value)">
+            <div class="subpanel">
+                <button class="accordion view">Point Light</button>
+                <div class="innerpanel">
+                    <p>Intensity:</p>
+                    <p id="demo"></p>
+                    <input type="range" min="1" max="100" value="50" class="slider" id="myRange"><br>
+                    <p>X: <input type="number" id="x" name="x" min="1" max="100"><br>
+                        Y: <input type="number" id="y" name="y" min="1" max="100"><br>
+                        Z: <input type="number" id="z" name="z" min="1" max="100"><br>
+                        <button onclick="update_lightpos(slider.value, x.value, y.value, z.value)">Change</button>
+                    </p>
+                </div>
+
+                <button class="accordion view">AmbientLight</button>
+                <div class="innerpanel">
+                    <label for="ambientcolor">Color:</label>
+                    <input type="color" id="ambientcolor" name="favcolor" value="#ff0000">
+                    <button onclick="update_ambient()">Change</button>
+                </div>
+
 
             </div>
 
             <button class="accordion view">Material</button>
-            <div class="panel">
-                <button name="basic" id="shading-button">Basic</button>
-                <button name="lambert" id="shading-button">Lambert</button>
-                <button name="phong" id="shading-button">Phong</button>
+            <div class="subpanel">
+                <button class="accordion view">Basic</button>
+                <div class="innerpanel">
+                    <label for="basiccolor">Color:</label>
+                    <input type="color" id="basiccolor" name="favcolor" value="#ff0000">
+                    <button onclick="basicMaterial()">Change</button>
+                </div>
+
+                <button class="accordion view">Lambert</button>
+                <div class="innerpanel">
+                    <label for="lambertcolor">Color:</label>
+                    <input type="color" id="lambertcolor" name="favcolor" value="#ff0000"><br>
+                    <label for="lambertemissivecolor">Emissive:</label>
+                    <input type="color" id="lambertemissivecolor" name="favcolor" value="#ff0000">
+                    <button onclick="lambertMaterial()">Change</button>
+                </div>
+
+                <button class="accordion view">Phong</button>
+                <div class="subpanel">
+                    <label for="phongcolor">Color:</label>
+                    <input type="color" id="phongcolor" name="favcolor" value="#ff0000"><br>
+                    <label for="phongemissivecolor">Emissive:</label>
+                    <input type="color" id="phongemissivecolor" name="favcolor" value="#ff0000"><br>
+                    <label for="phongspecularcolor">Specular:</label>
+                    <input type="color" id="phongspecularcolor" name="favcolor" value="#ff0000"><br>
+                    <input type="range" min="0" max="100" value="0" class="slider" id="phongshininess"><br>
+                    <input type="checkbox" id="phongflatshading" checked="false">
+                    <button onclick="phongMaterial()">Change</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -132,15 +174,30 @@
             });
         }
 
-        function openStats() {
+        /*function openStats() {
             document.getElementById("statistics").style.display = "block";
-        }
+        }*/
 
         function closeStats() {
             document.getElementById("statistics").style.display = "none";
         }
 
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
     <script type="module">
         import * as THREE from './../../routes/three.module.js';
@@ -151,6 +208,8 @@
     <script src="https://unpkg.com/three@0.126.1/examples/js/exporters/PLYExporter.js"></script>
     <script src="https://unpkg.com/three@0.126.1/examples/js/exporters/OBJExporter.js"></script>
 
+
+
     <script>
         $('#file-input').change(function () {
             $('#hole-input').val($(this).val().replace(/^.*\\/, "").replace("obj", "ply").replace("off", "ply"));
@@ -159,8 +218,9 @@
 
 
 
-
-
+        var display_mesh;
+        var point_light;
+        var ambientLight;
 
         function clearScene() {
             while (scene.children.length > 0) {
@@ -168,17 +228,16 @@
                 console.log(scene.children.length);
             }
             // Create a directional light to show off the object
-            var light = new THREE.PointLight(0xffffff, 1, 0);
-            light.position.set(50, 50, 50);
-            scene.add(light);
-            var ambientLight = new THREE.AmbientLight(0x404040);
+            point_light = new THREE.PointLight(0xffffff, 1, 0);
+            point_light.position.set(50, 50, 50);
+            scene.add(point_light);
+            ambientLight = new THREE.AmbientLight(0x404040);
             scene.add(ambientLight);
         }
 
         var renderer = null,
             scene = null,
             camera = null;
-
         var input = document.getElementById('file-input');
         var currentfilename = ""
         var valids = [".ply", '.obj']
@@ -187,8 +246,8 @@
 
         /*Get file input from HTML file upload button*/
         input.addEventListener('change', function (event) {
-            var file = this.files[0];					//Get the input file
-            var reader = new FileReader();				//Asynchronously read file content	
+            var file = this.files[0]; //Get the input file
+            var reader = new FileReader(); //Asynchronously read file content	
 
             /*Listener is used to wait until file is loaded*/
             reader.addEventListener('load', function (event) {
@@ -197,32 +256,54 @@
                 extension = (currentfilename).match(patterns)[0] //extract extension
                 //PLY file loading
                 if (extension === valids[0]) {
-                    console.log(extension)
-                    console.log(valids[0])
+                    //console.log(extension)
+                    //console.log(valids[0])
                     console.log('ply detected')
-                    var loader = new THREE.PLYLoader();
-                    var mesh = loader.parse(contents);		//Parse the .ply file content to get mesh
-                    mesh.computeVertexNormals();
-                    var material = new THREE.MeshStandardMaterial({ vertexcolors: THREE.FaceColors });
-                    var mesh = new THREE.Mesh(mesh, material);
-                    mesh.position.x = 0;
-                    mesh.position.y = 0;
-                    mesh.position.z = 0;
-                    mesh.scale.multiplyScalar(6);
 
-                    mesh.castShadow = true;
-                    mesh.receiveShadow = true;
+                    var loader = new THREE.PLYLoader();
+                    var mesh = loader.parse(contents); //Parse the .ply file content to get mesh
+                    mesh.computeVertexNormals();
+                    console.log(mesh);
+                    console.log(mesh.attributes.position.count)
+
+                    if (mesh.index == null) {
+                        var material = new THREE.PointsMaterial({
+                            size: 0.001,
+                            color: 0xFFFFFF
+                        });
+                        display_mesh = new THREE.Points(mesh, material)
+                        display_mesh.scale.multiplyScalar(6);
+                    } else {
+                        var material = new THREE.MeshStandardMaterial({
+                            vertexcolors: THREE.FaceColors
+                        });
+                        display_mesh = new THREE.Mesh(mesh, material);
+                        display_mesh.position.x = 0;
+                        display_mesh.position.y = 0;
+                        display_mesh.position.z = 0;
+                        display_mesh.scale.multiplyScalar(6);
+
+                        display_mesh.castShadow = true;
+                        display_mesh.receiveShadow = true;
+                    }
                 }
 
                 //OBJ File loading
                 if (extension === valids[1]) {
                     console.log('obj detected')
-                    var mesh = new THREE.OBJLoader().parse(contents);		//Parse the .obj file content to get mesh
+                    display_mesh = new THREE.OBJLoader().parse(contents); //Parse the .obj file content to get mesh
+                    //console.log(display_mesh)
                 }
 
                 clearScene();
-                scene.add(mesh);
+                scene.add(display_mesh);
+
+                //console.log(display_mesh)
+                camera.position.set(display_mesh.position.x, display_mesh.position.x, 100);
+                camera.lookAt(display_mesh.position);
+
                 console.log("file loaded")
+                console.log(scene);
             }, false);
 
             /*Error check*/
@@ -238,7 +319,7 @@
             console.log("callHighlight called")
             setTimeout(function () {
                 document.getElementById("displaymesh").click();
-            }, 20000)
+            }, 15000)
             console.log("callHighlight ended")
         }
 
@@ -246,7 +327,7 @@
             console.log("callFilled called")
             setTimeout(function () {
                 document.getElementById("filledmesh").click();
-            }, 20000)
+            }, 10000)
             console.log("callFilled ended")
         }
 
@@ -257,18 +338,23 @@
             loader.load('./../routes/detected_hole.ply', function (geometry) {
                 console.log("ply loaded");
                 geometry.computeVertexNormals();
-                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors })
+                var material = new THREE.MeshStandardMaterial({
+                    vertexColors: THREE.FaceColors
+                })
 
-                var mesh = new THREE.Mesh(geometry, material);
+                display_mesh = new THREE.Mesh(geometry, material);
 
-                mesh.position.x = 0;
-                mesh.position.y = 0;
-                mesh.position.z = 0;
-                mesh.scale.multiplyScalar(10);
+                display_mesh.position.x = 0;
+                display_mesh.position.y = 0;
+                display_mesh.position.z = 0;
+                display_mesh.scale.multiplyScalar(10);
 
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                scene.add(mesh);
+                display_mesh.castShadow = true;
+                display_mesh.receiveShadow = true;
+                scene.add(display_mesh);
+
+                camera.position.set(display_mesh.position.x, display_mesh.position.x, 100);
+                camera.lookAt(display_mesh.position);
 
             })
 
@@ -277,48 +363,24 @@
 
 
         function loadWireframe() {
-            clearScene();
-            console.log(extension)
-            if (extension === valids[1]) {
-                currentfilename = currentfilename.replace("obj", "ply").replace("off", "ply")
-                console.log(currentfilename)
-            }
-            var loader = new THREE.PLYLoader();
-            loader.load('./../routes/' + currentfilename, function (geometry) {
-                console.log('./../routes/' + currentfilename);
-                geometry.computeVertexNormals();
-                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
-                const wireframe = new THREE.WireframeGeometry(geometry);
-                const line = new THREE.LineSegments(wireframe);
-                line.material.depthTest = false;
-                line.material.opacity = 0.25;
-                line.material.transparent = true;
-                scene.add(line);
+            scene.traverse(function (child) {
+                if (child.isMesh) {
+                    child.material.wireframe = true;
+                }
+                display_mesh = child;
             });
+            display_mesh.geometry.uvsNeedUpdate = true;
+            display_mesh.needsUpdate = true;
         }
 
         function loadSolid() {
-            clearScene();
-            console.log(extension)
-            if (extension === valids[1]) {
-                currentfilename = currentfilename.replace("obj", "ply").replace("off", "ply")
-                console.log(currentfilename)
-            }
-            var loader = new THREE.PLYLoader();
-            loader.load('./../routes/' + currentfilename, function (geometry) {
-                console.log('./../routes/' + currentfilename);
-                geometry.computeVertexNormals();
-                var material = new THREE.MeshStandardMaterial({ vertexColors: THREE.FaceColors });
-                var mesh = new THREE.Mesh(mesh, material);
-                mesh.position.x = 0;
-                mesh.position.y = 0;
-                mesh.position.z = 0;
-                mesh.scale.multiplyScalar(6);
-
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                scene.add(mesh);
+            display_mesh.traverse(function (child) {
+                if (child.isMesh) {
+                    display_mesh.material.wireframe = false;
+                }
             });
+            display_mesh.geometry.uvsNeedUpdate = true;
+            display_mesh.needsUpdate = true;
         }
 
         function loadFilledMesh() {
@@ -328,45 +390,50 @@
             loader.load('./../routes/holefill.ply', function (geometry) {
                 console.log("ply loaded");
                 geometry.computeVertexNormals();
-                var material = new THREE.MeshStandardMaterial({ color: 0xd3d3d3 });
+                var material = new THREE.MeshStandardMaterial({
+                    color: 0xd3d3d3
+                });
 
-                var mesh = new THREE.Mesh(geometry, material);
+                display_mesh = new THREE.Mesh(geometry, material);
 
-                mesh.position.x = 0;
-                mesh.position.y = 0;
-                mesh.position.z = 0;
-                mesh.scale.multiplyScalar(10);
+                display_mesh.position.x = 0;
+                display_mesh.position.y = 0;
+                display_mesh.position.z = 0;
+                display_mesh.scale.multiplyScalar(10);
 
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                scene.add(mesh);
+                display_mesh.castShadow = true;
+                display_mesh.receiveShadow = true;
+                scene.add(display_mesh);
+
+                camera.position.set(display_mesh.position.x, display_mesh.position.x, 100);
+                camera.lookAt(display_mesh.position);
 
             })
 
         }
-
-
-        var light = new THREE.PointLight(0xffffff, 1, 0);
-        var ambientLight = new THREE.AmbientLight(0x404040);
 
         function onLoad() {
             // Grab our container div
             var container = document.getElementById("container");
 
             // Create the Three.js renderer, add it to our div
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
             renderer.setSize(container.offsetWidth, container.offsetHeight);
             container.appendChild(renderer.domElement);
 
             // Create a new Three.js scene
             scene = new THREE.Scene();
             // Put in a camera
-            camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.01, 10000);
             camera.position.set(0, 10, 10);
 
             // Create a directional light to show off the object
-            light.position.set(50, 50, 50);
-            scene.add(light);
+            point_light = new THREE.PointLight(0xffffff, 1, 0);
+            ambientLight = new THREE.AmbientLight(0x404040);
+            point_light.position.set(50, 50, 100);
+            scene.add(point_light);
             scene.add(ambientLight);
 
             //Add controls to zoom in and out
@@ -390,7 +457,9 @@
             document.body.appendChild(a);
             a.style = "display: none";
             return function (data, fileName) {
-                var blob = new Blob([data], { type: "octet/stream" }),
+                var blob = new Blob([data], {
+                    type: "octet/stream"
+                }),
                     url = window.URL.createObjectURL(blob);
                 a.href = url;
                 a.download = fileName;
@@ -414,7 +483,9 @@
             $.ajax({
                 type: "POST",
                 url: "http://localhost:3000/upload",
-                data: { filedata }
+                data: {
+                    filedata
+                }
             }).done(function (msg) {
                 alert("Data Saved: " + msg);
             });
@@ -431,8 +502,7 @@
         function exportAs(mesh, filetype) {
             if (filetype = "obj") {
                 exportOBJ(mesh);
-            }
-            else if (filetype = "ply") {
+            } else if (filetype = "ply") {
                 exportPLY(mesh);
             }
 
@@ -447,6 +517,60 @@
         }
 
 
+        function basicMaterial() {
+            basic_color = document.getElementById("basiccolor").value;
+            display_mesh.traverse(function (child) {
+                if (child.isMesh) {
+                    display_mesh.material = new THREE.MeshBasicMaterial({
+                        color: basic_color
+                    });
+                }
+            });
+            display_mesh.geometry.uvsNeedUpdate = true;
+            display_mesh.needsUpdate = true;
+        }
+
+        function lambertMaterial() {
+            display_mesh.traverse(function (child) {
+                var lambert_color = document.getElementById("lambertcolor").value;
+                var lambert_emissive = document.getElementById("lambertemissivecolor").value;
+                if (child.isMesh) {
+                    display_mesh.material = new THREE.MeshLambertMaterial({
+                        color: lambert_color,
+                        reflectivity: 10,
+                        refractionRatio: 0.98,
+                        emissive: lambert_emissive
+                    });
+                }
+            });
+            display_mesh.geometry.uvsNeedUpdate = true;
+            display_mesh.needsUpdate = true;
+        }
+
+        function phongMaterial() {
+            var phong_color = document.getElementById("phongcolor").value;
+            var phong_emissive = document.getElementById("phongemissivecolor").value;
+            var phong_specular = document.getElementById("phongspecularcolor").value;
+            var phong_shininess = document.getElementById("phongshininess").value;
+            var phong_flatshading = document.getElementById("phongflatshading").checked;
+            display_mesh.traverse(function (child) {
+                if (child.isMesh) {
+                    display_mesh.material = new THREE.MeshPhongMaterial({
+                        color: phong_color,
+                        emissive: phong_emissive,
+                        specular: phong_specular,
+                        shininess: phong_shininess,
+                        flatShading: phong_flatshading,
+                        reflectivity: 1,
+                        refractionRatio: 0.98,
+                    });
+                }
+            });
+            display_mesh.geometry.uvsNeedUpdate = true;
+            display_mesh.needsUpdate = true;
+        }
+
+
         var slider = document.getElementById("myRange");
         var output = document.getElementById("demo");
         output.innerHTML = slider.value; // Display the default slider value
@@ -456,13 +580,31 @@
             output.innerHTML = this.value;
         }
 
-        function adjust_light(val) {
+        function update_lightpos(val, x, y, z) {
+            console.log(x, y, z)
             console.log(val)
-            console.log(light)
-            light.intensity = val;
+            point_light.position.set(x, y, z);
+            point_light.intensity = val;
         }
 
+        function update_ambient() {
+            console.log(document.getElementById("ambientcolor").value)
+            console.log(scene)
+            ambientLight.color = document.getElementById("ambientcolor").value;
+        }
 
+        function displayAxis() {
+            const axesHelper = new THREE.AxesHelper(10);
+            scene.add(axesHelper);
+        }
+
+        function openStats() {
+            document.getElementById("statistics").style.display = "block";
+            document.getElementById("num-faces").innerHTML = "No. of faces: " + renderer.info.render.faces;
+            document.getElementById("num-vertices").innerHTML = "No. of vertices: " + renderer.info.render.vertices;
+            console.log(renderer.info);
+
+        }
 
     </script>
 
