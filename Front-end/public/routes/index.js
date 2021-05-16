@@ -10,7 +10,7 @@ router.post('/upload', function(req, res) {
     fs.writeFile('./public/uploads/bun_zipper.ply', res.body, function(err) {
         console.log("upload request sent")
         if (err) {
-            res.send('Something when wrong');
+            res.send('Something went wrong');
         } else {
             res.send('Saved!');
         }
